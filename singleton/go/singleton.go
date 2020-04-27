@@ -5,24 +5,24 @@ import (
 	"sync"
 )
 
-type Singletone struct {
+type Singleton struct {
 	Flag int
 }
 
 // hungry
-var hungryInstance = &Singletone{}
+var hungryInstance = &Singleton{}
 
-func HungrySingletone() *Singletone {
+func HungrySingleton() *Singleton {
 	return hungryInstance
 }
 
 // lazy
-var lazyInstance *Singletone
+var lazyInstance *Singleton
 
-func LazySingletone() *Singletone {
+func LazySingleton() *Singleton {
 	if lazyInstance == nil {
 		// 当第一次运行到这里时如果有其他协程并发创建实例，lazyInstance 仍为 nil，因此不能防并发
-		lazyInstance = &Singletone{}
+		lazyInstance = &Singleton{}
 	}
 
 	return lazyInstance
@@ -31,25 +31,25 @@ func LazySingletone() *Singletone {
 // lazy with lock
 var mutex sync.Mutex
 
-func SyncLazySingletone() *Singletone {
+func SyncLazySingleton() *Singleton {
 	// lock the flow expression, but lock and unlock every time
 	mutex.Lock()
 	defer mutex.Unlock()
 
 	if lazyInstance == nil {
-		lazyInstance = &Singletone{}
+		lazyInstance = &Singleton{}
 	}
 
 	return lazyInstance
 }
 
-func SyncLazySingletoneOptimize() *Singletone {
+func SyncLazySingletonOptimize() *Singleton {
 	if lazyInstance == nil {
 		mutex.Lock()
 		defer mutex.Unlock()
 
 		if lazyInstance == nil {
-			lazyInstance = &Singletone{}
+			lazyInstance = &Singleton{}
 		}
 	}
 
@@ -59,20 +59,20 @@ func SyncLazySingletoneOptimize() *Singletone {
 // sync.Once
 var once sync.Once
 
-func SyncLazySingletoneByOnce() *Singletone {
+func SyncLazySingletonByOnce() *Singleton {
 	once.Do(func() {
-		lazyInstance = &Singletone{}
+		lazyInstance = &Singleton{}
 	})
 
 	return lazyInstance
 }
 
 func main() {
-	// initFunc := HungrySingletone
-	// initFunc := LazySingletone
-	// initFunc := SyncLazySingletone
-	// initFunc := SyncLazySingletoneOptimize
-	initFunc := SyncLazySingletoneByOnce
+	// initFunc := HungrySingleton
+	// initFunc := LazySingleton
+	// initFunc := SyncLazySingleton
+	// initFunc := SyncLazySingletonOptimize
+	initFunc := SyncLazySingletonByOnce
 
 	instance := initFunc()
 	instance.Flag = 1
